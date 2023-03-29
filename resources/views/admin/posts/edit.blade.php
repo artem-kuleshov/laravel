@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 <div>
-    <form action="{{ route('posts.update', $post->id) }}" method="post">
+    <form action="{{ route('admin.posts.update', $post->id) }}" method="post">
         @csrf
         @method('patch')
         <div class="mb-3">
@@ -21,7 +21,7 @@
         </div>
         <div class="mb-3">
             <label for="category_id" class="form-label">Category</label>
-            <select class="form-select" name="category_id" id="category_id">
+            <select class="form-control" name="category_id" id="category_id">
                 @foreach($categories as $category)
                     <option {{ $category->id == $post->category_id ? 'selected' : ''}}
                             value="{{ $category->id }}">{{ $category->name }}</option>
@@ -33,7 +33,7 @@
         </div>
         <div class="mb-3">
             <label for="tags" class="form-label">Tags</label>
-            <select id="tags" name="tags[]" class="form-select" multiple>
+            <select class="form-control" id="tags" name="tags[]" multiple>
                 @foreach($tags as $tag)
                     <option {{ in_array($tag->id, $post_tags) ? 'selected' : ''}}
                             value="{{ $tag->id }}">{{ $tag->name }}</option>

@@ -5,9 +5,9 @@
 
         <li class="nav-header">Menu</li>
         <li class="nav-item">
-            <a href="pages/calendar.html" class="nav-link">
+            <a href="{{ route('admin.posts.index') }}" class="nav-link">
                 <i class="nav-icon far fa-calendar-alt"></i>
-                <p>Posts<span class="badge badge-info right">{{ $posts->total() }}</span></p>
+                <p>Posts<span class="badge badge-info right">{{ \App\Models\Post::count() }}</span></p>
             </a>
         </li>
 

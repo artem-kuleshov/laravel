@@ -21,28 +21,28 @@ class PostController extends Controller
         $filter = new PostFilter($data);
         $posts = Post::filter($filter)->paginate(10);
 
-        return view('admin.post.index', compact('posts'));
+        return view('admin.posts.index', compact('posts'));
     }
 
     public function create()
     {
         $categories = Category::all();
         $tags = Tag::all();
-        return view('posts.create', compact('categories', 'tags'));
+        return view('admin.posts.create', compact('categories', 'tags'));
     }
 
     public function store(CreateRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
-        Post::saveData($data);
+        (new Post())->saveData($data);
 
-        return redirect()->route('posts.index');
+        return redirect()->route('admin.posts.index');
     }
 
     public function show(Post $post)
     {
-        return view('posts.show', compact('post'));
+        return view('admin.posts.show', compact('post'));
     }
 
     public function edit(Post $post)
@@ -51,7 +51,7 @@ class PostController extends Controller
         $tags = Tag::all();
         $post_tags = $post->tags->pluck('id')->toArray();
 
-        return view('posts.edit', compact('post', 'categories', 'tags', 'post_tags'));
+        return view('admin.posts.edit', compact('post', 'categories', 'tags', 'post_tags'));
     }
 
     public function update(UpdateRequest $request, Post $post): RedirectResponse
@@ -60,13 +60,13 @@ class PostController extends Controller
 
         $post->updateData($data);
 
-        return redirect()->route('posts.show', $post->id);
+        return redirect()->route('admin.posts.show', $post->id);
     }
 
     public function destroy(Post $post): RedirectResponse
     {
         $post->delete();
-        return redirect()->route('posts.index');
+        return redirect()->route('admin.posts.index');
     }
 
 

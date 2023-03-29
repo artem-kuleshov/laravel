@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Post extends Model
 {
@@ -17,6 +18,8 @@ class Post extends Model
 
     protected $table = 'posts';
     protected $guarded = [];
+
+    private $tags_in = [];
 
     public function category(): BelongsTo
     {
@@ -28,21 +31,70 @@ class Post extends Model
         return $this->belongsToMany(Tag::class);
     }
 
-    public static function saveData(array $data): void
+    /**
+     * @throws \Exception
+     */
+    public function saveData(array $data): void
     {
-        $tags = $data['tags'];
-        unset($data['tags']);
+        $data = $this->prepareData($data);
 
-        $post = Post::create($data);
-        $post->tags()->attach($tags);
+        try {
+            DB::beginTransaction();
+
+            $post = Post::create($data);
+            $this->linkTagsForInsert($post);
+
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
+        }
     }
 
-    public function updateData($data)
+    /**
+     * @throws \Exception
+     */
+    public function updateData(array $data): void
     {
-        $tags = $data['tags'];
-        unset($data['tags']);
+        $data = $this->prepareData($data);
 
-        $this->update($data);
-        $this->tags()->sync($tags);
+        try {
+            DB::beginTransaction();
+
+            $this->update($data);
+            $this->linkTagsSync();
+
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
+        }
     }
+
+    private function prepareData(array $data): array
+    {
+        if (isset($data['tags'])) {
+            $this->tags_in = $data['tags'];
+            unset($data['tags']);
+        }
+
+        return $data;
+    }
+
+    private function linkTagsSync(): void
+    {
+        if ($this->tags_in) {
+            $this->tags()->sync($this->tags_in);
+        }
+    }
+
+    private function linkTagsForInsert(self $post)
+    {
+        if ($this->tags_in) {
+            $post->tags()->attach($this->tags_in);
+        }
+    }
+
 }

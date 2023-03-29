@@ -23,10 +23,13 @@ Route::get('/', function () {
 
 Route::resource('posts', PostController::class);
 
-Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth', 'is_admin']], function () {
-    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
-    Route::get('/posts', [PostAdmin::class, 'index'])->name('admin.post.index');
+Route::name('admin.')->prefix('admin')->middleware(['auth', 'is_admin'])->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+
+    Route::resource('/posts', PostAdmin::class);
 });
+
+Route::resource('/posts', PostController::class);
 
 Auth::routes();
 
